@@ -47,10 +47,33 @@ def check_non_negative(df: pl.DataFrame) -> list[str]:
 def check_time_order(df: pl.DataFrame) -> int:
     if "start_time" not in df.columns or "end_time" not in df.columns:
         return 0
+
+    # Parse ISO 8601 with trailing 'Z' as naive datetimes (sufficient for ordering checks).
+    # Your Polars version wants `format=` and does NOT support `utc=` here.
+    iso_z = "%Y-%m-%dT%H:%M:%SZ"
+
     tmp = df.with_columns(
         [
-            pl.col("start_time").str.strptime(pl.Datetime, strict=False).alias("start_dt"),
-            pl.col("end_time").str.strptime(pl.Datetime, strict=False).alias("end_dt"),
+            pl.col("start_time")
+            .cast(pl.Utf8, strict=False)
+            .str.strptime(pl.Datetime, format=iso_z, strict=False)
+            .alias("start_dt"),
+            pl.col("end_time")
+            .cast(pl.Utf8, strict=False)
+            .str.strptime(pl.Datetime, format=iso_z, strict=False)
+            .alias("end_dt"),
+        ]
+    )
+
+    return int(tmp.filter(pl.col("end_dt") < pl.col("start_dt")).height > 0)
+    if "start_time" not in df.columns or "end_time" not in df.columns:
+        return 0
+    tmp = df.with_columns(
+        [
+            pl.col("start_time")
+            .str.strptime(pl.Datetime, strict=False, utc=True)
+            .alias("start_dt"),
+            pl.col("end_time").str.strptime(pl.Datetime, strict=False, utc=True).alias("end_dt"),
         ]
     )
     return int(tmp.filter(pl.col("end_dt") < pl.col("start_dt")).height > 0)
