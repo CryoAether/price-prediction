@@ -1,2 +1,4 @@
-# price-prediction
-A generative model built with python to scrape eBay listing data and scikit-learn to predict future pricing
+
+# Price Prediction for eBay Listings
+Second-generation project to predict final sale price and sale probability within N days.
+See docs in `reports/model_cards` and `docs/`.
