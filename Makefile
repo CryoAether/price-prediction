@@ -3,7 +3,7 @@
 setup: ; poetry install
 lint: ; poetry run ruff check . && poetry run black --check . && poetry run isort --check-only .
 format: ; poetry run ruff check . --fix && poetry run black . && poetry run isort .
-test: ; poetry run pytest
+test: ; PYTHONPATH=src poetry run pytest
 
 run-api: ; poetry run uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 run-app: ; poetry run streamlit run app/streamlit_app.py
