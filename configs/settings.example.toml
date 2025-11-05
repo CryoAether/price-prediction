@@ -1,0 +1,14 @@
+[ebay]
+app_id = ""
+client_id = ""
+client_secret = ""
+site = "EBAY_US"
+
+[storage]
+data_root = "data"
+duckdb_path = "data/artifacts/warehouse.duckdb"
+parquet_bucket = "data/raw"
+
+[postgres]
+url = "postgresql+psycopg://user:password@localhost:5432/ebay_price"
+schema = "public"
