@@ -18,7 +18,7 @@ def to_polars(rows: Iterable[dict]) -> pl.DataFrame:
 
     # Cast columns
     def ts(col: str) -> pl.Series:
-        return pl.col(col).str.strptime(pl.Datetime, strict=False, utc=True)
+        return pl.col(col).str.strptime(pl.Datetime, strict=False).dt.replace_time_zone("UTC")
 
     cast = []
     for name, _dtype in (
