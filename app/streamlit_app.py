@@ -8,8 +8,37 @@ from ebay_price.features.inference import prepare_features_for_inference
 
 ART_DIR = Path("data/artifacts/models")
 
+
+@st.cache_resource(show_spinner=False)
+def get_model():
+    from ebay_price.modeling.loaders import load_reg_model_and_columns
+
+    return load_reg_model_and_columns()
+
+
+@st.cache_data(show_spinner=False)
+def read_csv_cached(path_str: str):
+    from pathlib import Path as _P
+
+    import pandas as _pd
+
+    p = _P(path_str)
+    return _pd.read_csv(p) if p.exists() else None
+
+
 st.set_page_config(page_title="eBay Price Prediction", page_icon="📈", layout="wide")
 st.title("eBay Price Prediction")
+st.markdown(
+    """
+    <style>
+      .block-container {max-width: 1120px; margin: 0 auto; padding-top: 1.25rem;}
+      h1 { margin-top: 0.4rem; }
+      .stButton>button {width: 100%;}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 tabs = st.tabs(["Predict", "Insights"])
 
 with tabs[0]:
@@ -24,87 +53,85 @@ with tabs[0]:
     ).name
     st.caption(f"Using model: {model_name}")
 
-    st.header("Listing")
-    with st.form("predict_form"):
-        title = st.text_input("Title", value="Apple iPhone 12 128GB")
-        brand = st.selectbox("Brand", ["Apple", "Samsung", "Google", "OnePlus"], index=0)
-        model = st.selectbox(
-            "Model", ["iPhone 12", "iPhone 13", "Galaxy S21", "Pixel 6", "OnePlus 9"], index=0
-        )
-        category_path = st.text_input(
-            "Category Path", "Cell Phones & Accessories > Cell Phones & Smartphones"
-        )
-        condition = st.selectbox("Condition", ["Used", "Refurbished", "New"], index=0)
-        start_price = st.number_input(
-            "Start Price", min_value=0.0, value=250.0, step=5.0, format="%.2f"
-        )
-        shipping_cost = st.number_input(
-            "Shipping Cost", min_value=0.0, value=10.0, step=1.0, format="%.2f"
-        )
-        watchers = st.number_input("Watchers", min_value=0, value=15, step=1)
-        bids = st.number_input("Bids", min_value=0, value=12, step=1)
+    # Center the form in a slightly wider middle column
+    left, mid, right = st.columns([1, 2.8, 1])
+    with mid:
+        st.header("Listing")
+        with st.form("predict_form"):
+            title = st.text_input("Title", value="Apple iPhone 12 128GB")
+            brand = st.selectbox("Brand", ["Apple", "Samsung", "Google", "OnePlus"], index=0)
+            model = st.selectbox(
+                "Model",
+                ["iPhone 12", "iPhone 13", "Galaxy S21", "Pixel 6", "OnePlus 9"],
+                index=0,
+            )
+            category_path = st.text_input(
+                "Category Path",
+                "Cell Phones & Accessories > Cell Phones & Smartphones",
+            )
+            condition = st.selectbox("Condition", ["Used", "Refurbished", "New"], index=0)
+            start_price = st.number_input(
+                "Start Price", min_value=0.0, value=250.0, step=5.0, format="%.2f"
+            )
+            shipping_cost = st.number_input(
+                "Shipping Cost", min_value=0.0, value=10.0, step=1.0, format="%.2f"
+            )
+            watchers = st.number_input("Watchers", min_value=0, value=15, step=1)
+            bids = st.number_input("Bids", min_value=0, value=12, step=1)
 
-        submitted = st.form_submit_button("Predict price")
-        if submitted:
-            payload = {
-                "title": title,
-                "brand": brand,
-                "model": model,
-                "category_path": category_path,
-                "condition": condition,
-                "start_price": float(start_price),
-                "shipping_cost": float(shipping_cost),
-                "watchers": int(watchers),
-                "bids": int(bids),
-                "currency": "USD",
-            }
-            # ✅ FIX: pass a pandas DataFrame, not a dict
-            X_pl = prepare_features_for_inference(pd.DataFrame([payload]))
+            submitted = st.form_submit_button("Predict price")
+            if submitted:
+                payload = {
+                    "title": title,
+                    "brand": brand,
+                    "model": model,
+                    "category_path": category_path,
+                    "condition": condition,
+                    "start_price": float(start_price),
+                    "shipping_cost": float(shipping_cost),
+                    "watchers": int(watchers),
+                    "bids": int(bids),
+                    "currency": "USD",
+                }
 
-            # Align to training feature columns if saved
-            cols_path = ART_DIR / "reg_feature_columns.json"
-            if cols_path.exists():
-                X_pl = align_to_columns(X_pl, cols_path.read_text())
-
-            # Load model and predict
-            from ebay_price.modeling.loaders import load_reg_model_and_columns
-
-            model_obj, cols, mname = load_reg_model_and_columns()
-            if cols:
-                X_pl = align_to_columns(X_pl, cols)
-            pred = float(model_obj.predict(X_pl.to_pandas().fillna(0))[0])
-            st.caption(f"Using model: {mname}")
-            st.success(f"Predicted price: ${pred:,.2f}")
+                # Build features and predict
+                X_pl = prepare_features_for_inference(pd.DataFrame([payload]))
+                model_obj, cols, mname = get_model()
+                if cols:
+                    X_pl = align_to_columns(X_pl, cols)
+                with st.spinner("Scoring…"):
+                    pred = float(model_obj.predict(X_pl.to_pandas().fillna(0))[0])
+                st.caption(f"Using model: {mname}")
+                st.success(f"Predicted price: ${pred:,.2f}")
 
 with tabs[1]:
     st.header("Model Insights")
-    from pathlib import Path as _P
 
-    import pandas as _pd
-
-    plots = _P("data/artifacts/plots")
+    plots = Path("data/artifacts/plots")
     perm_csv = plots / "perm_importance.csv"
     nat_csv = plots / "native_importance.csv"
     shap_img = plots / "shap_summary.png"
     imgs = sorted(plots.glob("pd_ice_*.png"))
 
-    if perm_csv.exists():
+    df_perm = read_csv_cached(str(perm_csv))
+    if df_perm is not None:
         st.subheader("Permutation importance")
-        st.dataframe(_pd.read_csv(perm_csv).head(30))
+        st.dataframe(df_perm.head(30))
     else:
         st.info("Run `make explain-no-shap` (or `make explain`) to compute insights.")
 
-    if nat_csv.exists():
+    df_nat = read_csv_cached(str(nat_csv))
+    if df_nat is not None:
         st.subheader("Native feature importance")
-        st.dataframe(_pd.read_csv(nat_csv).head(30))
+        st.dataframe(df_nat.head(30))
 
     if shap_img.exists():
         st.subheader("SHAP summary")
-        st.image(str(shap_img), width="stretch")
+        st.image(str(shap_img), use_container_width=True)
 
     st.subheader("Partial Dependence / ICE")
     if imgs:
         for im in imgs:
-            st.image(str(im), caption=im.name, width="stretch")
+            st.image(str(im), caption=im.name, use_container_width=True)
     else:
         st.caption("No PD/ICE plots yet. Run `make explain-no-shap`.")
