@@ -142,17 +142,13 @@ def compute_shap_summary(max_samples: int = 2000) -> Path | None:
 
 
 def compute_pd_ice(features: list[str]) -> list[tuple[str, Path]]:
-    """
-    Generate Partial Dependence + ICE plots for selected features.
-    Returns list of (feature, image_path).
-    """
+    """Generate PD + ICE plots for selected features and save them correctly."""
     model, cols, _ = load_reg_model_and_columns()
     df = load_train()
     X_pl, _ = feature_target_split(df, "final_price")
     if cols:
         X_pl = align_to_columns(X_pl, cols)
     X = _to_pandas(X_pl)
-    # Ensure numeric columns are float for PD/ICE (sklearn warns on integer dtypes)
     num_cols = X.select_dtypes(include=["number"]).columns
     X[num_cols] = X[num_cols].astype("float64")
 
@@ -160,14 +156,19 @@ def compute_pd_ice(features: list[str]) -> list[tuple[str, Path]]:
     for f in features:
         if f not in X.columns:
             continue
-        fig = plt.figure()
         try:
-            PartialDependenceDisplay.from_estimator(model, X, [f], kind="both")
+            disp = PartialDependenceDisplay.from_estimator(
+                model, X, [f], kind="both", subsample=50, random_state=42
+            )
             out = PLOTS / f"pd_ice_{f}.png"
+            # Save using the actual figure object that sklearn creates
+            fig = disp.figure_
+            fig.tight_layout()
             fig.savefig(out, bbox_inches="tight", dpi=160)
             plt.close(fig)
             paths.append((f, out))
-        except Exception:
-            plt.close(fig)
+        except Exception as e:
+            plt.close("all")
+            print(f"⚠️ PD plot failed for {f}: {e}")
             continue
     return paths
