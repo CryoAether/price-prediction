@@ -31,7 +31,7 @@ def train_regression(target: str = "final_price"):
     if classes.size < 2:
         print("[classification] Skipping training: only one class present in full dataset.")
         return
-    X_tr, X_va, y_tr, y_va = train_val_split(X, y, stratify=True)
+    X_tr, X_va, y_tr, y_va = train_val_split(X, y)
 
     # Linear baseline
     lr = LinearRegression(n_jobs=None)
