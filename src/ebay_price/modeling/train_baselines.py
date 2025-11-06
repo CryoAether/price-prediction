@@ -21,28 +21,21 @@ def train_regression(target: str = "final_price"):
     if target not in df.columns:
         raise SystemExit(f"Target '{target}' not in training data.")
     X, y = feature_target_split(df, target)
-    y_np = y.to_pandas().values
-    classes = np.unique(y_np)
-    if classes.size < 2:
-        print("[classification] Skipping training: only one class present in data.")
-        return
-    y_np_all = y.to_pandas().values
-    classes = np.unique(y_np_all)
-    if classes.size < 2:
-        print("[classification] Skipping training: only one class present in full dataset.")
-        return
     X_tr, X_va, y_tr, y_va = train_val_split(X, y)
+
+    # Size check for tree models that require >=2 training samples
     n_train = getattr(y_tr, "shape", None)[0] if hasattr(y_tr, "shape") else len(y_tr)
-    # If the training set is too small for LightGBM, run only LinearRegression and skip LGBM.
     tiny_train = n_train < 2
 
-    # Linear baseline
+    # Linear baseline (always runs)
     lr = LinearRegression(n_jobs=None)
     lr.fit(X_tr, y_tr)
     yhat = lr.predict(X_va)
     m_lr = regression_metrics(y_va, yhat)
 
-    # LightGBM baseline (skip when training set is too small)
+    metrics_out = {"linear": m_lr}
+
+    # LightGBM baseline (only when training set has >= 2 rows)
     if not tiny_train:
         lgbm = LGBMRegressor(
             n_estimators=400,
@@ -51,18 +44,20 @@ def train_regression(target: str = "final_price"):
             subsample=0.8,
             colsample_bytree=0.8,
             random_state=42,
+            verbosity=-1,
         )
         lgbm.fit(X_tr, y_tr, eval_set=[(X_va, y_va)])
         yhat_l = lgbm.predict(X_va)
         m_lgbm = regression_metrics(y_va, yhat_l)
+        metrics_out["lightgbm"] = m_lgbm
+        joblib.dump(lgbm, ARTIFACTS_DIR / "reg_lightgbm.joblib")
+    else:
+        metrics_out["lightgbm"] = "skipped: training set < 2 rows"
 
     # Save artifacts
     joblib.dump(lr, ARTIFACTS_DIR / "reg_linear.joblib")
-    joblib.dump(lgbm, ARTIFACTS_DIR / "reg_lightgbm.joblib")
-    (ARTIFACTS_DIR / "reg_metrics.json").write_text(
-        json.dumps({"linear": m_lr, "lightgbm": m_lgbm}, indent=2)
-    )
-    print("Regression metrics:", {"linear": m_lr, "lightgbm": m_lgbm})
+    (ARTIFACTS_DIR / "reg_metrics.json").write_text(json.dumps(metrics_out, indent=2))
+    print("Regression metrics:", metrics_out)
 
 
 def train_classification(target: str = "sold"):
