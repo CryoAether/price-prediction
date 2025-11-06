@@ -1,4 +1,4 @@
-.PHONY: setup lint test format run-api run-app mlflow ingest-local duckdb-shell validate
+.PHONY: setup lint test format run-api run-app mlflow ingest-local duckdb-shell validate api
 
 setup: ; poetry install
 lint: ; poetry run ruff check . && poetry run black --check . && poetry run isort --check-only .
@@ -25,4 +25,5 @@ coverage: ; PYTHONPATH=src poetry run pytest --cov=src --cov-report=term-missing
 mlflow-log: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.log_to_mlflow
 mlflow-ui: ; poetry run mlflow ui --backend-store-uri $${MLFLOW_TRACKING_URI:-file:./data/artifacts/mlruns}
 api:
+	PYTHONPATH=src poetry run uvicorn api.app:app --reload --port 8000
 	PYTHONPATH=src poetry run uvicorn api.app:app --reload --port 8000
