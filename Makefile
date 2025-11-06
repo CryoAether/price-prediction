@@ -16,3 +16,6 @@ validate: ; PYTHONPATH=src poetry run python ge/create_suite.py
 # use Poetry's Python so duckdb is available
 duckdb-shell: ; poetry run python -c 'import duckdb; con=duckdb.connect("data/artifacts/warehouse.duckdb"); print(con.execute("SELECT COUNT(*) FROM listings").fetchall())'
 build-features: ; PYTHONPATH=src poetry run python -m ebay_price.features.build_features
+
+train-regression: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.train_baselines --task regression
+train-classification: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.train_baselines --task classification
