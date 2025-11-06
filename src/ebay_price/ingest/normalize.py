@@ -15,20 +15,29 @@ def validate_rows(rows: Iterable[dict[str, Any]]):
 
 def to_polars(rows: Iterable[dict]) -> pl.DataFrame:
     df = pl.DataFrame(list(rows))
+    if df.is_empty():
+        return df
 
-    # Cast columns
-    def ts(col: str) -> pl.Series:
-        return pl.col(col).str.strptime(pl.Datetime, strict=False).dt.replace_time_zone("UTC")
-
-    cast = []
-    for name, _dtype in (
-        ("start_time", pl.Datetime),
-        ("end_time", pl.Datetime),
-    ):
-        if name in df.columns:
-            cast.append(ts(name).alias(name))
-    if cast:
-        df = df.with_columns(cast)
+    # Parse timestamps robustly
+    iso_fmt = "%+"
+    for col in ("start_time", "end_time"):
+        if col in df.columns:
+            # Try expression-based parse first
+            try:
+                df = df.with_columns(
+                    pl.col(col)
+                    .cast(pl.Utf8, strict=False)
+                    .str.to_datetime(format=iso_fmt, strict=False, time_zone="UTC")
+                    .alias(col)
+                )
+            except Exception:
+                # Fallback: eager Series parsing (as Polars suggests)
+                parsed = (
+                    df.get_column(col)
+                    .cast(pl.Utf8, strict=False)
+                    .str.to_datetime(format=iso_fmt, strict=False, time_zone="UTC")
+                )
+                df = df.with_columns(parsed.alias(col))
 
     # Fill NA sensibly
     fill_map = {
