@@ -1,4 +1,4 @@
-.PHONY: setup lint test format run-api run-app mlflow ingest-local duckdb-shell validate api ingest-jsonl ingest-csv etl-train
+.PHONY: etl-train-noclf  setup lint test format run-api run-app mlflow ingest-local duckdb-shell validate api ingest-jsonl ingest-csv etl-train
 
 setup: ; poetry install
 lint: ; poetry run ruff check . && poetry run black --check . && poetry run isort --check-only .
@@ -35,3 +35,6 @@ ingest-csv:
 	PYTHONPATH=src poetry run python -m ebay_price.ingest.cli --ingest data/raw/listings.csv
 etl-train:
 	PYTHONPATH=src poetry run python -m ebay_price.ingest.flow --path data/raw/synthetic.jsonl
+
+etl-train-noclf:
+	PYTHONPATH=src poetry run python -m ebay_price.ingest.flow --path data/raw/synthetic.jsonl --no-clf
