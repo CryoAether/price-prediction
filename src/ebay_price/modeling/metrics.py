@@ -17,7 +17,8 @@ def regression_metrics(y_true, y_pred) -> dict[str, Any]:
     y_true = np.asarray(y_true)
     y_pred = np.asarray(y_pred)
     mae = mean_absolute_error(y_true, y_pred)
-    rmse = mean_squared_error(y_true, y_pred, squared=False)
+    mse = mean_squared_error(y_true, y_pred)
+    rmse = float(np.sqrt(mse))
     r2 = r2_score(y_true, y_pred)
     # guard for zero targets to avoid division by zero in MAPE
     denom = np.where(np.abs(y_true) < 1e-8, 1.0, np.abs(y_true))
