@@ -62,11 +62,7 @@ price-prediction/
 ```
 ---
 
-## ⚙️ Installation
+## ⚙️ Setup & Usage
 
-### 1. Clone the repository
-```bash
-git clone https://github.com/CryoAether/price-prediction.git
-cd price-prediction
-```
-
+Full setup, configuration, and environment details will be documented soon.  
+Refer to the upcoming **[Installation Guide](./docs/setup_guide.md)** for step-by-step instructions once published.
