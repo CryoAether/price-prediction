@@ -64,10 +64,22 @@ def train_classification(target: str = "sold"):
     df = load_train()
     if target not in df.columns:
         raise SystemExit(f"Target '{target}' not in training data.")
-    # Ensure binary 0/1
+    # ensure boolean 0/1
     if df.get_column(target).dtype != pl.Boolean:
         df = df.with_columns(pl.col(target).cast(pl.Boolean, strict=False))
     X, y = feature_target_split(df, target)
+    # single-class guard BEFORE split
+    y_np_all = y.to_pandas().values
+    classes = np.unique(y_np_all)
+    if classes.size < 2:
+        # write a metrics file to keep downstream steps simple
+        ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+        (ARTIFACTS_DIR / "clf_metrics.json").write_text(
+            json.dumps({"logit": "skipped: one class", "lightgbm": "skipped: one class"}, indent=2)
+        )
+        print("[classification] Skipping training: only one class present in full dataset.")
+        return
+
     y_np_all = y.to_pandas().values
     classes = np.unique(y_np_all)
     if classes.size < 2:
