@@ -21,3 +21,6 @@ train-regression: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.trai
 train-classification: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.train_baselines --task classification
 
 coverage: ; PYTHONPATH=src poetry run pytest --cov=src --cov-report=term-missing
+
+mlflow-log: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.log_to_mlflow
+mlflow-ui: ; poetry run mlflow ui --backend-store-uri $${MLFLOW_TRACKING_URI:-file:./data/artifacts/mlruns}
