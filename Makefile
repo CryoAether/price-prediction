@@ -19,3 +19,5 @@ build-features: ; PYTHONPATH=src poetry run python -m ebay_price.features.build_
 
 train-regression: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.train_baselines --task regression
 train-classification: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.train_baselines --task classification
+
+coverage: ; PYTHONPATH=src poetry run pytest --cov=src --cov-report=term-missing
