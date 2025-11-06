@@ -40,8 +40,26 @@ def save_outputs(feat: pl.DataFrame) -> None:
     # Optional supervised set if targets exist
     targets = [c for c in ("final_price", "sold") if c in feat.columns]
     if targets:
-        cols = [c for c in feat.columns if c not in ("title", "start_time", "end_time")]
-        train = feat.select(cols)
+        numeric_like = {
+            pl.Int8,
+            pl.Int16,
+            pl.Int32,
+            pl.Int64,
+            pl.UInt8,
+            pl.UInt16,
+            pl.UInt32,
+            pl.UInt64,
+            pl.Float32,
+            pl.Float64,
+            pl.Boolean,
+        }
+        keep: list[str] = []
+        for c, t in zip(feat.columns, feat.dtypes, strict=False):
+            if c in ("title", "start_time", "end_time"):
+                continue
+            if (c in targets) or (t in numeric_like):
+                keep.append(c)
+        train = feat.select(keep)
         train.write_parquet(PROCESSED_DIR / "train.parquet")
 
 
