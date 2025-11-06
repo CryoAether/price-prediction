@@ -26,6 +26,11 @@ def train_regression(target: str = "final_price"):
     if classes.size < 2:
         print("[classification] Skipping training: only one class present in data.")
         return
+    y_np_all = y.to_pandas().values
+    classes = np.unique(y_np_all)
+    if classes.size < 2:
+        print("[classification] Skipping training: only one class present in full dataset.")
+        return
     X_tr, X_va, y_tr, y_va = train_val_split(X, y, stratify=True)
 
     # Linear baseline
@@ -64,7 +69,12 @@ def train_classification(target: str = "sold"):
     if df.get_column(target).dtype != pl.Boolean:
         df = df.with_columns(pl.col(target).cast(pl.Boolean, strict=False))
     X, y = feature_target_split(df, target)
-    X_tr, X_va, y_tr, y_va = train_val_split(X, y)
+    y_np_all = y.to_pandas().values
+    classes = np.unique(y_np_all)
+    if classes.size < 2:
+        print("[classification] Skipping training: only one class present in full dataset.")
+        return
+    X_tr, X_va, y_tr, y_va = train_val_split(X, y, stratify=True)
 
     # Logistic Regression (liblinear works well on small)
     logit = LogisticRegression(max_iter=1000)
