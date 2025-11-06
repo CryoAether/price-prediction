@@ -47,3 +47,12 @@ explain-no-shap:
 
 validate-ci:
 	PYTHONPATH=src poetry run python -m ebay_price.validation.ge_checks --fail-fast
+
+prefect-orion:
+	poetry run prefect server start
+
+prefect-deploy:
+	PYTHONPATH=src poetry run python -m ebay_price.flows.deploy
+
+prefect-agent:
+	poetry run prefect agent start -q default
