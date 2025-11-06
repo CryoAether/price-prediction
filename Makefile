@@ -56,3 +56,9 @@ prefect-deploy:
 
 prefect-agent:
 	poetry run prefect agent start -q default
+
+ge-validate:
+	PYTHONPATH=src poetry run python -m ebay_price.validation.ge_checks
+
+ge-validate-ci:
+	PYTHONPATH=src poetry run python -m ebay_price.validation.ge_checks --fail-fast
