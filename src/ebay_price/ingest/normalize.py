@@ -57,6 +57,7 @@ def to_polars(rows: Iterable[dict]) -> pl.DataFrame:
         "watchers": 0,
         "bids": 0,
         "currency": "USD",
+        "final_price": 0.0,
         "sold": 0,
     }
     for k, v in fill_map.items():
