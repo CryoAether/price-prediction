@@ -60,3 +60,13 @@ price-prediction/
 ├── pyproject.toml                # Dependencies (Poetry)
 └── Dockerfile                    # Containerized environment
 ```
+---
+
+## ⚙️ Installation
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/CryoAether/price-prediction.git
+cd price-prediction
+```
+
