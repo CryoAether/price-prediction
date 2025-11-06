@@ -33,7 +33,7 @@ prefect = "*"
 fastapi = "*"
 uvicorn = {extras = ["standard"], version = "^0.38.0"}
 streamlit = "*"
-great-expectations = "*"
+ great-expectations = "^0.18.0"
 sentence-transformers = "*"
 spacy = "*"
 shap = "^0.49.1"
