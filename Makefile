@@ -1,4 +1,4 @@
-.PHONY: setup lint test format run-api run-app mlflow ingest-local duckdb-shell validate api
+.PHONY: setup lint test format run-api run-app mlflow ingest-local duckdb-shell validate api ingest-jsonl ingest-csv etl-train
 
 setup: ; poetry install
 lint: ; poetry run ruff check . && poetry run black --check . && poetry run isort --check-only .
@@ -29,3 +29,9 @@ api:
 	PYTHONPATH=src poetry run uvicorn api.app:app --reload --port 8000
 
 streamlit: ; PYTHONPATH=src poetry run streamlit run app/streamlit_app.py
+ingest-jsonl:
+	PYTHONPATH=src poetry run python -m ebay_price.ingest.cli --ingest data/raw/synthetic.jsonl
+ingest-csv:
+	PYTHONPATH=src poetry run python -m ebay_price.ingest.cli --ingest data/raw/listings.csv
+etl-train:
+	PYTHONPATH=src poetry run python -m ebay_price.ingest.flow --path data/raw/synthetic.jsonl
