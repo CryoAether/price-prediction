@@ -64,5 +64,5 @@ if st.button("Predict price"):
         cols = json.loads(cols_path.read_text())
         X = align_to_columns(X, cols)
     model = joblib.load(model_path)
-    pred = float(model.predict(X.to_pandas().fillna(0).values)[0])
+    pred = float(model.predict(X.to_pandas().fillna(0))[0])
     st.success(f"Predicted price: ${pred:,.2f}")
