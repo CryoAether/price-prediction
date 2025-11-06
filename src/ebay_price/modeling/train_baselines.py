@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import joblib
+import numpy as np
 import polars as pl
 from lightgbm import LGBMClassifier, LGBMRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
@@ -20,7 +21,12 @@ def train_regression(target: str = "final_price"):
     if target not in df.columns:
         raise SystemExit(f"Target '{target}' not in training data.")
     X, y = feature_target_split(df, target)
-    X_tr, X_va, y_tr, y_va = train_val_split(X, y)
+    y_np = y.to_pandas().values
+    classes = np.unique(y_np)
+    if classes.size < 2:
+        print("[classification] Skipping training: only one class present in data.")
+        return
+    X_tr, X_va, y_tr, y_va = train_val_split(X, y, stratify=True)
 
     # Linear baseline
     lr = LinearRegression(n_jobs=None)
@@ -37,7 +43,7 @@ def train_regression(target: str = "final_price"):
         colsample_bytree=0.8,
         random_state=42,
     )
-    lgbm.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], verbose=False)
+    lgbm.fit(X_tr, y_tr, eval_set=[(X_va, y_va)])
     yhat_l = lgbm.predict(X_va)
     m_lgbm = regression_metrics(y_va, yhat_l)
 
@@ -75,7 +81,7 @@ def train_classification(target: str = "sold"):
         colsample_bytree=0.8,
         random_state=42,
     )
-    lgbm.fit(X_tr, y_tr, eval_set=[(X_va, y_va)], verbose=False)
+    lgbm.fit(X_tr, y_tr, eval_set=[(X_va, y_va)])
     prob_l = lgbm.predict_proba(X_va)[:, 1]
     m_lgbm = classification_metrics(y_va, prob_l)
 
