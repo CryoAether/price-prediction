@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import joblib
 import streamlit as st
 
+from ebay_price.features.align import align_to_columns
 from ebay_price.features.inference import prepare_features_for_inference
 
 ART_DIR = Path("data/artifacts/models")
@@ -56,6 +58,11 @@ if st.button("Predict price"):
         "currency": "USD",
     }
     X = prepare_features_for_inference(payload)
+    # Align to training feature columns saved during training
+    cols_path = ART_DIR / "reg_feature_columns.json"
+    if cols_path.exists():
+        cols = json.loads(cols_path.read_text())
+        X = align_to_columns(X, cols)
     model = joblib.load(model_path)
     pred = float(model.predict(X.to_pandas().fillna(0).values)[0])
     st.success(f"Predicted price: ${pred:,.2f}")
