@@ -44,3 +44,6 @@ explain:
 
 explain-no-shap:
 	PYTHONPATH=src poetry run python -m ebay_price.explain.cli --no-shap
+
+validate-ci:
+	PYTHONPATH=src poetry run python -m ebay_price.validation.ge_checks --fail-fast
