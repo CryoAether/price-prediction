@@ -13,6 +13,8 @@ ART_DIR = Path("data/artifacts/models")
 
 st.title("eBay Price Prediction — Demo")
 
+tabs = st.tabs(["Predict", "Insights"])
+
 with st.sidebar:
     st.header("Model selection")
     reg_light = ART_DIR / "reg_lightgbm.joblib"
@@ -66,3 +68,34 @@ if st.button("Predict price"):
     model = joblib.load(model_path)
     pred = float(model.predict(X.to_pandas().fillna(0))[0])
     st.success(f"Predicted price: ${pred:,.2f}")
+
+
+with tabs[1]:
+    st.header("Model Insights")
+    from pathlib import Path
+
+    import pandas as pd
+
+    plots = Path("data/artifacts/plots")
+    perm_csv = plots / "perm_importance.csv"
+    nat_csv = plots / "native_importance.csv"
+    if perm_csv.exists():
+        st.subheader("Permutation importance")
+        st.dataframe(pd.read_csv(perm_csv).head(20))
+    else:
+        st.info("Run `make explain` to compute insights.")
+    if nat_csv.exists():
+        st.subheader("Native feature importance")
+        st.dataframe(pd.read_csv(nat_csv).head(20))
+    shap_img = plots / "shap_summary.png"
+    if shap_img.exists():
+        st.subheader("SHAP summary")
+        st.image(str(shap_img))
+    # PD/ICE gallery
+    st.subheader("Partial Dependence / ICE")
+    imgs = list(plots.glob("pd_ice_*.png"))
+    if imgs:
+        for im in imgs:
+            st.image(str(im), caption=im.name)
+    else:
+        st.caption("No PD/ICE plots yet. Run `make explain`.")
