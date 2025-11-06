@@ -31,8 +31,12 @@ st.title("eBay Price Prediction")
 st.markdown(
     """
     <style>
-      .block-container {max-width: 1120px; margin: 0 auto; padding-top: 1.25rem;}
-      h1 { margin-top: 0.4rem; }
+      .block-container {max-width: 1120px; margin: 0 auto; padding-top: 2.5rem;}
+      h1 {
+        margin-top: 0.8rem !important;
+        margin-bottom: 0.8rem !important;
+        line-height: 1.2 !important;
+      }
       .stButton>button {width: 100%;}
     </style>
     """,
