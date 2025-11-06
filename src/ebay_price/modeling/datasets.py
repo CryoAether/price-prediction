@@ -50,10 +50,17 @@ def to_numpy(df: pl.DataFrame):
     return df.to_pandas().fillna(0).values  # simple and compatible with most estimators
 
 
-def train_val_split(X: pl.DataFrame, y: pl.Series, test_size: float = 0.2, random_state: int = 42):
-    X_np = to_numpy(X)
+def train_val_split(
+    X: pl.DataFrame,
+    y: pl.Series,
+    test_size: float = 0.2,
+    random_state: int = 42,
+    stratify: bool = False,
+):
+    X_np = X.to_pandas().fillna(0).values
     y_np = y.to_pandas().values
+    strat = y_np if stratify else None
     X_tr, X_va, y_tr, y_va = train_test_split(
-        X_np, y_np, test_size=test_size, random_state=random_state
+        X_np, y_np, test_size=test_size, random_state=random_state, stratify=strat
     )
     return X_tr, X_va, y_tr, y_va
