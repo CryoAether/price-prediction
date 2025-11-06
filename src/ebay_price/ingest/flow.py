@@ -29,11 +29,11 @@ def t_train_classification() -> None:
 @flow(name="eBay ETL + Train")
 def etl_train(path: str | None = None, do_classification: bool = True) -> None:
     if path:
-        t_ingest.submit(path)
-    t_refresh_features.submit()
-    t_train_regression.submit()
+        t_ingest(path)
+    t_refresh_features()
+    t_train_regression()
     if do_classification:
-        t_train_classification.submit()
+        t_train_classification()
 
 
 if __name__ == "__main__":
