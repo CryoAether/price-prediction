@@ -27,3 +27,5 @@ mlflow-ui: ; poetry run mlflow ui --backend-store-uri $${MLFLOW_TRACKING_URI:-fi
 api:
 	PYTHONPATH=src poetry run uvicorn api.app:app --reload --port 8000
 	PYTHONPATH=src poetry run uvicorn api.app:app --reload --port 8000
+
+streamlit: ; PYTHONPATH=src poetry run streamlit run app/streamlit_app.py
