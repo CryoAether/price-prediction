@@ -90,12 +90,12 @@ with tabs[1]:
     shap_img = plots / "shap_summary.png"
     if shap_img.exists():
         st.subheader("SHAP summary")
-        st.image(str(shap_img))
+        st.image(str(shap_img), use_container_width=True)
     # PD/ICE gallery
     st.subheader("Partial Dependence / ICE")
     imgs = list(plots.glob("pd_ice_*.png"))
     if imgs:
         for im in imgs:
-            st.image(str(im), caption=im.name)
+            st.image(str(im), caption=im.name, use_container_width=True)
     else:
         st.caption("No PD/ICE plots yet. Run `make explain`.")
