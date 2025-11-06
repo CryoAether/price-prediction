@@ -32,6 +32,9 @@ def train_regression(target: str = "final_price"):
         print("[classification] Skipping training: only one class present in full dataset.")
         return
     X_tr, X_va, y_tr, y_va = train_val_split(X, y)
+    n_train = getattr(y_tr, "shape", None)[0] if hasattr(y_tr, "shape") else len(y_tr)
+    # If the training set is too small for LightGBM, run only LinearRegression and skip LGBM.
+    tiny_train = n_train < 2
 
     # Linear baseline
     lr = LinearRegression(n_jobs=None)
@@ -39,18 +42,19 @@ def train_regression(target: str = "final_price"):
     yhat = lr.predict(X_va)
     m_lr = regression_metrics(y_va, yhat)
 
-    # LightGBM baseline
-    lgbm = LGBMRegressor(
-        n_estimators=400,
-        learning_rate=0.05,
-        max_depth=-1,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        random_state=42,
-    )
-    lgbm.fit(X_tr, y_tr, eval_set=[(X_va, y_va)])
-    yhat_l = lgbm.predict(X_va)
-    m_lgbm = regression_metrics(y_va, yhat_l)
+    # LightGBM baseline (skip when training set is too small)
+    if not tiny_train:
+        lgbm = LGBMRegressor(
+            n_estimators=400,
+            learning_rate=0.05,
+            max_depth=-1,
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=42,
+        )
+        lgbm.fit(X_tr, y_tr, eval_set=[(X_va, y_va)])
+        yhat_l = lgbm.predict(X_va)
+        m_lgbm = regression_metrics(y_va, yhat_l)
 
     # Save artifacts
     joblib.dump(lr, ARTIFACTS_DIR / "reg_linear.joblib")
