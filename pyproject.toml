@@ -9,8 +9,8 @@ readme = "README.md"
 packages = [{ include = "ebay_price", from = "src" }]
 
 [tool.poetry.dependencies]
-# Use the Python you actually have active (3.12 is fine with spaCy)
-python = "^3.12"
+# Use the Python you actually have active (3.11+ is supported)
+python = "^3.11"
 pandas = "*"
 polars = "*"
 pyarrow = "*"
@@ -51,14 +51,14 @@ types-PyYAML = "*"
 
 [tool.black]
 line-length = 100
-target-version = ["py312"]
+target-version = ["py311"]
 
 [tool.isort]
 profile = "black"
 line_length = 100
 
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.11"
 warn_unused_ignores = true
 disallow_untyped_defs = false
 ignore_missing_imports = true
@@ -79,7 +79,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py311"
 src = ["src","api","app","tests"]
 
 [tool.ruff.lint]

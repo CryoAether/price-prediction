@@ -5,7 +5,7 @@ lint: ; poetry run ruff check . && poetry run black --check . && poetry run isor
 format: ; poetry run ruff check . --fix && poetry run black . && poetry run isort .
 test: ; PYTHONPATH=src poetry run pytest
 
-run-api: ; poetry run uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+run-api: ; poetry run uvicorn api.app:app --reload --host 0.0.0.0 --port 8000
 run-app: ; poetry run streamlit run app/streamlit_app.py
 mlflow: ; poetry run mlflow ui --host 127.0.0.1 --port 5000
 
@@ -25,7 +25,6 @@ coverage: ; PYTHONPATH=src poetry run pytest --cov=src --cov-report=term-missing
 mlflow-log: ; PYTHONPATH=src poetry run python -m ebay_price.modeling.log_to_mlflow
 mlflow-ui: ; poetry run mlflow ui --backend-store-uri $${MLFLOW_TRACKING_URI:-file:./data/artifacts/mlruns}
 api:
-	PYTHONPATH=src poetry run uvicorn api.app:app --reload --port 8000
 	PYTHONPATH=src poetry run uvicorn api.app:app --reload --port 8000
 
 streamlit: ; PYTHONPATH=src poetry run streamlit run app/streamlit_app.py
