@@ -26,7 +26,7 @@ It integrates data ingestion, feature engineering, model training, evaluation, a
 
 | Layer | Technologies |
 |-------|---------------|
-| **Language** | Python 3.12 |
+| **Language** | Python 3.11+ (tests run on 3.11.12) |
 | **Core Libraries** | pandas, polars, numpy, scikit-learn |
 | **ML/Stats** | LightGBM, XGBoost, CatBoost, statsmodels |
 | **Pipelines** | Prefect, Great Expectations |
@@ -64,5 +64,6 @@ price-prediction/
 
 ## ⚙️ Setup & Usage
 
-Full setup, configuration, and environment details will be documented soon.  
-Refer to the upcoming **[Installation Guide](./docs/setup_guide.md)** for step-by-step instructions once published.
+- Use Python 3.11 when running the CLI, Streamlit, or API locally (the toolchain and tests are pinned to that version).
+- Install dependencies with [Poetry](https://python-poetry.org/) via `poetry install` (see `pyproject.toml`).
+- Full setup, configuration, and environment details will be documented soon. Refer to the upcoming **[Installation Guide](./docs/setup_guide.md)** for step-by-step instructions once published.

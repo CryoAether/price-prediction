@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import joblib
+import pandas as pd
 from fastapi import FastAPI, HTTPException
 
 from ebay_price.api.schemas import ListingIn
@@ -41,7 +42,8 @@ def predict_price(item: ListingIn) -> dict[str, Any]:
     except FileNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from None
 
-    X = prepare_features_for_inference(item.model_dump())
+    payload = pd.DataFrame([item.model_dump()])
+    X = prepare_features_for_inference(payload)
     if X.height == 0:
         raise HTTPException(status_code=400, detail="No features produced from payload.")
     cols = _load_feature_columns("reg_feature_columns.json")
@@ -62,7 +64,8 @@ def predict_sold(item: ListingIn) -> dict[str, Any]:
     except FileNotFoundError as e:
         raise HTTPException(status_code=400, detail=str(e)) from None
 
-    X = prepare_features_for_inference(item.model_dump())
+    payload = pd.DataFrame([item.model_dump()])
+    X = prepare_features_for_inference(payload)
     if X.height == 0:
         raise HTTPException(status_code=400, detail="No features produced from payload.")
     cols = _load_feature_columns("clf_feature_columns.json")

@@ -16,11 +16,11 @@ def datetime_features(df: pl.DataFrame) -> pl.DataFrame:
         [
             pl.col("start_time")
             .cast(pl.Utf8, strict=False)
-            .str.strptime(pl.Datetime, format="%Y-%m-%dT%H:%M:%SZ", strict=False)
+            .str.strptime(pl.Datetime, format="%+", strict=False)
             .alias("start_dt"),
             pl.col("end_time")
             .cast(pl.Utf8, strict=False)
-            .str.strptime(pl.Datetime, format="%Y-%m-%dT%H:%M:%SZ", strict=False)
+            .str.strptime(pl.Datetime, format="%+", strict=False)
             .alias("end_dt"),
         ]
     ).with_columns(
