@@ -3,7 +3,7 @@
 Second-generation machine learning project to **predict the final sale price** and **probability of sale within N days** for eBay listings.  
 This version extends the original model with improved data pipelines, feature engineering, automated retraining, and explainability reports.  
 
-See detailed documentation in [`reports/model_cards`](./reports/model_cards) and [`docs/`](./docs/). **(COMING SOON)**
+See detailed documentation: **(COMING SOON)**
 
 ---
 
