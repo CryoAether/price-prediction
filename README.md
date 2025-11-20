@@ -1,9 +1,7 @@
 # Price Prediction for eBay Listings
 
-Second-generation machine learning project to **predict the final sale price** and **probability of sale within N days** for eBay listings.  
+Second-generation machine learning project to predict the final sale price and probability of sale within N days for eBay listings.  
 This version extends the original model with improved data pipelines, feature engineering, automated retraining, and explainability reports.  
-
-See detailed documentation: **(COMING SOON)**
 
 ---
 
