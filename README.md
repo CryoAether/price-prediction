@@ -26,7 +26,7 @@ It integrates data ingestion, feature engineering, model training, evaluation, a
 
 | Layer | Technologies |
 |-------|---------------|
-| **Language** | Python 3.11+ (tests run on 3.11.12) |
+| **Language** | Python
 | **Core Libraries** | pandas, polars, numpy, scikit-learn |
 | **ML/Stats** | LightGBM, XGBoost, CatBoost, statsmodels |
 | **Pipelines** | Prefect, Great Expectations |
